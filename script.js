@@ -1,51 +1,54 @@
-/* ==============================
-   Scroll Frame Animation
-============================== */
+/* ===========================
+   Scroll Animation
+=========================== */
 
 const frameCount = 240;
-const canvas = document.getElementById("frameCanvas");
+const canvas = document.getElementById("animationCanvas");
 const context = canvas.getContext("2d");
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const currentFrame = index => 
+const currentFrame = index =>
   `frames/ezgif-frame-${index.toString().padStart(3, '0')}.jpg`;
 
 const images = [];
-const img = new Image();
-
 for (let i = 1; i <= frameCount; i++) {
-  const image = new Image();
-  image.src = currentFrame(i);
-  images.push(image);
+  const img = new Image();
+  img.src = currentFrame(i);
+  images.push(img);
+}
+
+function drawFrame(index) {
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.drawImage(images[index], 0, 0, canvas.width, canvas.height);
 }
 
 window.addEventListener("scroll", () => {
   const scrollTop = document.documentElement.scrollTop;
-  const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+  const maxScroll =
+    document.documentElement.scrollHeight - window.innerHeight;
+
   const frameIndex = Math.min(
     frameCount - 1,
     Math.floor((scrollTop / maxScroll) * frameCount)
   );
 
-  requestAnimationFrame(() => updateImage(frameIndex));
+  requestAnimationFrame(() => drawFrame(frameIndex));
 });
 
-function updateImage(index) {
-  context.clearRect(0, 0, canvas.width, canvas.height);
-  context.drawImage(images[index], 0, 0, canvas.width, canvas.height);
-}
-
-/* ==============================
-   Chatbot (Gemini 2.5 Flash)
-============================== */
+/* ===========================
+   Gemini Chatbot
+=========================== */
 
 const API_KEY = "YOUR_GEMINI_API_KEY";
 
 const SYSTEM_PROMPT = `
-You are a resume assistant chatbot.
-You MUST answer ONLY using the information below.
+You are a strict resume assistant chatbot.
+
+You MUST answer ONLY using the information provided below.
+Do NOT add extra information.
+Do NOT guess.
 If the question is not related to this resume, reply:
 "I can only answer questions related to Ranjith Kumar's resume."
 
@@ -63,7 +66,7 @@ Education:
 BE - Electronics and Communication Engineering
 Government College of Engineering, Tirunelveli
 CGPA: 7.2
-2023 - Now
+2023 - NOW
 
 HSC - SRM Muthamizhil Hr Secondary School
 2022 - 2023
@@ -102,7 +105,7 @@ async function sendMessage() {
   inputField.value = "";
 
   const response = await fetch(
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + API_KEY,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -110,7 +113,11 @@ async function sendMessage() {
         contents: [
           {
             role: "user",
-            parts: [{ text: SYSTEM_PROMPT + "\nUser Question: " + userText }]
+            parts: [
+              {
+                text: SYSTEM_PROMPT + "\n\nUser Question: " + userText
+              }
+            ]
           }
         ]
       })
@@ -118,7 +125,9 @@ async function sendMessage() {
   );
 
   const data = await response.json();
-  const botReply = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response";
+  const botReply =
+    data.candidates?.[0]?.content?.parts?.[0]?.text ||
+    "No response.";
 
   chatBody.innerHTML += `<div><strong>Bot:</strong> ${botReply}</div>`;
   chatBody.scrollTop = chatBody.scrollHeight;
