@@ -1,95 +1,83 @@
 /* ===========================
-   Scroll Animation
+   SCROLL FRAME ANIMATION
 =========================== */
 
 const frameCount = 240;
 const canvas = document.getElementById("animationCanvas");
 const context = canvas.getContext("2d");
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
 
-const currentFrame = index =>
-  `frames/ezgif-frame-${index.toString().padStart(3, '0')}.jpg`;
+const currentFrame = (index) =>
+  `frames/ezgif-frame-${index.toString().padStart(3, "0")}.jpg`;
 
 const images = [];
+let imagesLoaded = 0;
+
+// Preload images
 for (let i = 1; i <= frameCount; i++) {
   const img = new Image();
   img.src = currentFrame(i);
+  img.onload = () => {
+    imagesLoaded++;
+    if (imagesLoaded === 1) {
+      // Draw first frame immediately
+      context.drawImage(img, 0, 0, canvas.width, canvas.height);
+    }
+  };
   images.push(img);
 }
 
-function drawFrame(index) {
-  context.clearRect(0, 0, canvas.width, canvas.height);
-  context.drawImage(images[index], 0, 0, canvas.width, canvas.height);
-}
-
+// Scroll event
 window.addEventListener("scroll", () => {
-  const scrollTop = document.documentElement.scrollTop;
+  const scrollTop = window.scrollY;
   const maxScroll =
-    document.documentElement.scrollHeight - window.innerHeight;
+    document.body.scrollHeight - window.innerHeight;
 
+  const scrollFraction = scrollTop / maxScroll;
   const frameIndex = Math.min(
     frameCount - 1,
-    Math.floor((scrollTop / maxScroll) * frameCount)
+    Math.floor(scrollFraction * frameCount)
   );
 
-  requestAnimationFrame(() => drawFrame(frameIndex));
+  requestAnimationFrame(() => {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(
+      images[frameIndex],
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+  });
 });
 
 /* ===========================
-   Gemini Chatbot
+   GEMINI CHATBOT
 =========================== */
 
 const API_KEY = "YOUR_GEMINI_API_KEY";
 
 const SYSTEM_PROMPT = `
 You are a strict resume assistant chatbot.
-
-You MUST answer ONLY using the information provided below.
-Do NOT add extra information.
-Do NOT guess.
-If the question is not related to this resume, reply:
+You MUST answer ONLY using the resume details below.
+If question is unrelated, reply:
 "I can only answer questions related to Ranjith Kumar's resume."
 
 Resume Content:
-
 Name: Ranjith Kumar P
-
-Professional Summary:
-Detail-oriented ECE engineer with a solid understanding of analog and digital electronics,
-microcontrollers, and communication systems. Proficient in C and Python, with hands-on exposure to
-simulation tools and hardware interfacing. Seeking an opportunity to apply technical knowledge in
-real-world engineering applications.
-
-Education:
-BE - Electronics and Communication Engineering
-Government College of Engineering, Tirunelveli
+ECE Engineer
 CGPA: 7.2
-2023 - NOW
-
-HSC - SRM Muthamizhil Hr Secondary School
-2022 - 2023
-
-Skills:
-Leadership
-Analytics
-Basics Python
-Teamwork
-Communication
-Problem Solving
-Innovation
-Collaboration
-
-Languages:
-Tamil
-English
-
-Interests:
-Cricket
-Listening Music
-
-Contact:
+Government College of Engineering, Tirunelveli
+Skills: Leadership, Analytics, Basics Python, Teamwork,
+Communication, Problem Solving, Innovation, Collaboration
+Languages: Tamil, English
+Interests: Cricket, Listening Music
 Phone: +91 63815 87076
 Email: ranjithkumarlcu143@gmail.com
 Location: Kallakurichi (D.T), Tamil Nadu, India
@@ -113,11 +101,7 @@ async function sendMessage() {
         contents: [
           {
             role: "user",
-            parts: [
-              {
-                text: SYSTEM_PROMPT + "\n\nUser Question: " + userText
-              }
-            ]
+            parts: [{ text: SYSTEM_PROMPT + "\nUser Question: " + userText }]
           }
         ]
       })
