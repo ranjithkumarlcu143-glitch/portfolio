@@ -1,80 +1,125 @@
-const canvas = document.getElementById('scroll-canvas');
-const context = canvas.getContext('2d');
+/* ==============================
+   Scroll Frame Animation
+============================== */
 
-// Configuration
 const frameCount = 240;
-const currentFrame = index => ./frames/ezgif-frame-${index.toString().padStart(3, '0')}.jpg;
+const canvas = document.getElementById("frameCanvas");
+const context = canvas.getContext("2d");
 
-// Resume Content [cite: 1, 3, 5, 7, 14, 23]
-const resumeText = `
-Name: Ranjith Kumar P. 
-Contact: +91 63815 87076, ranjithkumarlcu143@gmail.com. 
-Location: Kallakurichi, Tamil Nadu. 
-Education: BE in Electronics and Communication Engineering from Government College of Engineering, Tirunelveli (CGPA: 7.2). 
-Skills: Basic Python, C, Leadership, Communication, Analytics, Teamwork, Innovation, Problem Solving, Collaboration. 
-Interests: Cricket, Listening Music.
-Summary: Detail-oriented ECE engineer focused on microcontrollers and communication systems.
-`;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-// 1. SCROLL ANIMATION
+const currentFrame = index => 
+  `frames/ezgif-frame-${index.toString().padStart(3, '0')}.jpg`;
+
+const images = [];
 const img = new Image();
-img.src = currentFrame(1);
-canvas.width = 1920; 
-canvas.height = 1080;
 
-img.onload = () => context.drawImage(img, 0, 0);
-
-const updateImage = index => {
-    img.src = currentFrame(index);
-    context.drawImage(img, 0, 0);
+for (let i = 1; i <= frameCount; i++) {
+  const image = new Image();
+  image.src = currentFrame(i);
+  images.push(image);
 }
 
-window.addEventListener('scroll', () => {
-    const scrollTop = document.documentElement.scrollTop;
-    const maxScrollTop = document.documentElement.scrollHeight - window.innerHeight;
-    const scrollFraction = scrollTop / maxScrollTop;
-    const frameIndex = Math.min(frameCount - 1, Math.ceil(scrollFraction * frameCount));
-    
-    requestAnimationFrame(() => updateImage(frameIndex + 1));
+window.addEventListener("scroll", () => {
+  const scrollTop = document.documentElement.scrollTop;
+  const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+  const frameIndex = Math.min(
+    frameCount - 1,
+    Math.floor((scrollTop / maxScroll) * frameCount)
+  );
+
+  requestAnimationFrame(() => updateImage(frameIndex));
 });
 
-// 2. CHATBOT LOGIC
-const chatToggle = document.getElementById('chat-toggle');
-const chatWindow = document.getElementById('chat-window');
-const chatInput = document.getElementById('chat-input');
-const chatBody = document.getElementById('chat-body');
-const sendBtn = document.getElementById('chat-send');
-
-chatToggle.onclick = () => chatWindow.classList.toggle('hidden');
-
-async function callGemini(userMessage) {
-    const API_KEY = "YOUR_GEMINI_API_KEY"; // Replace with your actual key
-    const url = https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY};
-
-    const systemPrompt = `You are an AI assistant representing Ranjith Kumar P. 
-    STRICT RULE: Answer ONLY using the following resume information: ${resumeText}. 
-    If the answer is not in the text, say: "I'm sorry, that information is not available in Ranjith's resume."`;
-
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            contents: [{ parts: [{ text: ${systemPrompt}\nUser: ${userMessage} }] }]
-        })
-    });
-
-    const data = await response.json();
-    return data.candidates[0].content.parts[0].text;
+function updateImage(index) {
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.drawImage(images[index], 0, 0, canvas.width, canvas.height);
 }
 
-sendBtn.onclick = async () => {
-    const message = chatInput.value;
-    if (!message) return;
+/* ==============================
+   Chatbot (Gemini 2.5 Flash)
+============================== */
 
-    chatBody.innerHTML += <div><b>You:</b> ${message}</div>;
-    chatInput.value = '';
+const API_KEY = "YOUR_GEMINI_API_KEY";
 
-    const aiResponse = await callGemini(message);
-    chatBody.innerHTML += <div><b>AI:</b> ${aiResponse}</div>;
-    chatBody.scrollTop = chatBody.scrollHeight;
-};
+const SYSTEM_PROMPT = `
+You are a resume assistant chatbot.
+You MUST answer ONLY using the information below.
+If the question is not related to this resume, reply:
+"I can only answer questions related to Ranjith Kumar's resume."
+
+Resume Content:
+
+Name: Ranjith Kumar P
+
+Professional Summary:
+Detail-oriented ECE engineer with a solid understanding of analog and digital electronics,
+microcontrollers, and communication systems. Proficient in C and Python, with hands-on exposure to
+simulation tools and hardware interfacing. Seeking an opportunity to apply technical knowledge in
+real-world engineering applications.
+
+Education:
+BE - Electronics and Communication Engineering
+Government College of Engineering, Tirunelveli
+CGPA: 7.2
+2023 - Now
+
+HSC - SRM Muthamizhil Hr Secondary School
+2022 - 2023
+
+Skills:
+Leadership
+Analytics
+Basics Python
+Teamwork
+Communication
+Problem Solving
+Innovation
+Collaboration
+
+Languages:
+Tamil
+English
+
+Interests:
+Cricket
+Listening Music
+
+Contact:
+Phone: +91 63815 87076
+Email: ranjithkumarlcu143@gmail.com
+Location: Kallakurichi (D.T), Tamil Nadu, India
+`;
+
+async function sendMessage() {
+  const inputField = document.getElementById("userInput");
+  const chatBody = document.getElementById("chatBody");
+  const userText = inputField.value.trim();
+  if (!userText) return;
+
+  chatBody.innerHTML += `<div><strong>You:</strong> ${userText}</div>`;
+  inputField.value = "";
+
+  const response = await fetch(
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + API_KEY,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: SYSTEM_PROMPT + "\nUser Question: " + userText }]
+          }
+        ]
+      })
+    }
+  );
+
+  const data = await response.json();
+  const botReply = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response";
+
+  chatBody.innerHTML += `<div><strong>Bot:</strong> ${botReply}</div>`;
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
