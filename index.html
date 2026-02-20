@@ -2,37 +2,33 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <title>Ranjith Kumar | Resume Portfolio</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ranjith Kumar P | Portfolio</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <canvas id="scroll-canvas"></canvas>
-
-    <main>
-        <section class="panel hero">
-            <h1>RANJITH KUMAR P</h1>
-            <p>ECE Engineer | Innovator</p>
-        </section>
-        <section class="panel">
-            <h2>Scroll to Explore</h2>
-        </section>
-        <div style="height: 500vh;"></div> 
-    </main>
-
-    <div id="chat-widget">
-        <div id="chat-window" class="hidden">
-            <div id="chat-header">AI Resume Assistant</div>
-            <div id="chat-body"></div>
-            <div id="chat-footer">
-                <input type="text" id="chat-input" placeholder="Ask about my skills...">
-                <button id="chat-send">Send</button>
-            </div>
-        </div>
-        <button id="chat-toggle">💬</button>
+    <!-- Scroll Animation Section -->
+    <div class="scroll-container">
+        <canvas id="frameCanvas"></canvas>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Overlay Info -->
+    <div class="overlay">
+        <h1>Ranjith Kumar P</h1>
+        <p>Electronics and Communication Engineer</p>
+    </div>
+
+    <!-- Chatbot Widget -->
+    <div class="chatbot">
+        <div class="chat-header">Resume Assistant</div>
+        <div class="chat-body" id="chatBody"></div>
+        <div class="chat-input">
+            <input type="text" id="userInput" placeholder="Ask about my resume...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+<script src="script.js"></script>
 </body>
 </html>
