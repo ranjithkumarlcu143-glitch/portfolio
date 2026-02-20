@@ -1,33 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Ranjith Kumar | Resume Portfolio</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Ranjith Kumar | Resume Portfolio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Scroll Animation Section -->
-    <div class="scroll-container">
-        <canvas id="frameCanvas"></canvas>
-    </div>
+  <!-- Scroll Animation Section -->
+  <div class="scroll-container">
+    <canvas id="animationCanvas"></canvas>
+  </div>
 
-    <!-- Overlay Info -->
-    <div class="overlay">
-        <h1>Ranjith Kumar P</h1>
-        <p>Electronics and Communication Engineer</p>
-    </div>
+  <!-- Resume Info Overlay -->
+  <div class="overlay">
+    <h1>Ranjith Kumar P</h1>
+    <p>Electronics and Communication Engineer</p>
+    <p>CGPA: 7.2</p>
+  </div>
 
-    <!-- Chatbot Widget -->
-    <div class="chatbot">
-        <div class="chat-header">Resume Assistant</div>
-        <div class="chat-body" id="chatBody"></div>
-        <div class="chat-input">
-            <input type="text" id="userInput" placeholder="Ask about my resume...">
-            <button onclick="sendMessage()">Send</button>
-        </div>
+  <!-- Chatbot Widget -->
+  <div class="chatbot">
+    <div class="chat-header">Resume Assistant</div>
+    <div class="chat-body" id="chatBody"></div>
+    <div class="chat-input">
+      <input type="text" id="userInput" placeholder="Ask about my resume...">
+      <button onclick="sendMessage()">Send</button>
     </div>
+  </div>
 
 <script src="script.js"></script>
 </body>
